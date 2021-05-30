@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>zfs on c-goes's Linux Blog</title><link>https://c-goes.github.io/tags/zfs/</link><description>Recent content in zfs on c-goes's Linux Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 30 May 2021 22:00:00 +0200</lastBuildDate><atom:link href="https://c-goes.github.io/tags/zfs/index.xml" rel="self" type="application/rss+xml"/><item><title>Bitbake fails with could not allocate block in ext2 filesystem on ZFS. How to work around this issue?</title><link>https://c-goes.github.io/posts/bitbake-yocto-could-not-allocate-block-in-ext2-filesystem/</link><pubDate>Sun, 30 May 2021 22:00:00 +0200</pubDate><guid>https://c-goes.github.io/posts/bitbake-yocto-could-not-allocate-block-in-ext2-filesystem/</guid><description>Symptom Bitbake build fails in a LXC container located on ZFS storage (Proxmox PVE) with a error message
+&amp;ldquo;__populate_fs: Could not allocate block in ext2 filesystem while writing file&amp;hellip;&amp;rdquo;
+Workaround Make a ZFS subvolume with a ext4 filesystem and then mount it into the unprivileged container. The container user has UID 1000 which is mappend to 101000 on the host.
+zfs create -s -V 80G rpool/tmp-build mkfs.ext4 /dev/zvol/rpool/tmp-build mkdir /tmp-build mount /dev/zvol/rpool/tmp-build /tmp-build # add LXC user's uid to 100000 chown -R 101000:101000 /tmp-build/ # bind mount to LXC container using Proxmox tool pct set 104 -mp0 mp=/tmp-build,/tmp-build Change your config to use the new tmpdir in local.</description><content>&lt;h1 id="symptom">Symptom&lt;/h1>
+&lt;p>Bitbake build fails in a LXC container located on ZFS storage (Proxmox PVE) with a error message&lt;/p>
+&lt;blockquote>
+&lt;p>&amp;ldquo;__populate_fs: Could not allocate block in ext2 filesystem while writing file&amp;hellip;&amp;rdquo;&lt;/p>
+&lt;/blockquote>
+&lt;h1 id="workaround">Workaround&lt;/h1>
+&lt;p>Make a ZFS subvolume with a ext4 filesystem and then mount it into the unprivileged container. The container user has UID &lt;code>1000&lt;/code> which is mappend to &lt;code>101000&lt;/code> on the host.&lt;/p>
+&lt;pre>&lt;code>zfs create -s -V 80G rpool/tmp-build
+mkfs.ext4 /dev/zvol/rpool/tmp-build
+mkdir /tmp-build
+mount /dev/zvol/rpool/tmp-build /tmp-build
+# add LXC user's uid to 100000
+chown -R 101000:101000 /tmp-build/
+# bind mount to LXC container using Proxmox tool
+pct set 104 -mp0 mp=/tmp-build,/tmp-build
+&lt;/code>&lt;/pre>&lt;p>Change your config to use the new tmpdir in local.conf or kas&amp;rsquo;s &lt;code>local_conf_header&lt;/code>.&lt;/p>
+&lt;pre>&lt;code>TMPDIR = &amp;quot;/tmp-build/dunfell&amp;quot;
+&lt;/code>&lt;/pre></content></item></channel></rss>
